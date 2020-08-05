@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Light Ketchup App</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Light Ketchup App</string>
+    <string name="nav_header_subtitle">m.wajahatqureshi@gmail.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="radarSwitchTxt">Radar</string>
+    <string name="preference_file_key">lightKetchupPrefVals</string>
+    <string name="saved_last_active_timeNdate">0</string>
+</resources>
