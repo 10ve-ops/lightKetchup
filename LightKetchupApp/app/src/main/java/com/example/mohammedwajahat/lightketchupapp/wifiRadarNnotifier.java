@@ -11,20 +11,13 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.Toast;
-
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import androidx.annotation.Nullable;
 
 public class wifiRadarNnotifier extends Service {
 
@@ -35,7 +28,7 @@ public class wifiRadarNnotifier extends Service {
     List<String> ssidList = new ArrayList<>();
     int alarmUserSetVol = 0;
     AudioManager am;
-    boolean SILENT_MODE=true;
+    boolean SILENT_MODE=false;
     public wifiRadarNnotifier() {
     }
 
@@ -79,8 +72,9 @@ public class wifiRadarNnotifier extends Service {
         scanRunnable = new Runnable() {
             @Override
             public void run() {
-                try {
-                    wifiManager.startScan();
+                try { wifiManager.setWifiEnabled(true);
+                    Log.w(TAG, "Starting Scan...");
+                    Log.d(TAG, "Scan res:" + wifiManager.startScan());
                 } finally {
                     // 100% guarantee that this always happens, even if
                     // your update method throws an exception
@@ -110,22 +104,17 @@ public class wifiRadarNnotifier extends Service {
 
 
      final BroadcastReceiver receiver = new BroadcastReceiver() {
-        @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean success = intent.getBooleanExtra(
-                    WifiManager.EXTRA_RESULTS_UPDATED, false);
-            List<ScanResult> results = wifiManager.getScanResults();
-            final int size = results.size();
-            if(results.size()>0) {
-                Log.d(TAG, "********WIFI-SCAN RESULTS*********");
-                Log.d(TAG, ">>>>>>>>>"+results.toString()+"<<<<<<<<<");
-            }  if(results.toString().contains("Ghaznavi"))
+              List<ScanResult> results = wifiManager.getScanResults();
+              Log.d(TAG, "********WIFI-SCAN RESULTS*********");
+              Log.d(TAG, String.valueOf(results));
+              Log.d(TAG, ">>>>>>>>>" + results.toString() + "<<<<<<<<<");
+            if(results.toString().contains("Ghaznavi")||results.toString().contains("Wan"))
                     setNotifierStatus(true);
                 else{
                     setNotifierStatus(false);
                 }
-
         }
     };
 
