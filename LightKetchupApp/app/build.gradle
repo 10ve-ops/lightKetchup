@@ -24,7 +24,7 @@ android {
         includeInApk true
         includeInBundle true
     }
-    buildToolsVersion '26.0.3'
+    namespace 'com.example.mohammedwajahat.lightketchupapp'
 }
 
 dependencies {

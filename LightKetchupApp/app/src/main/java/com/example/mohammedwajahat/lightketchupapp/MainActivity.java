@@ -6,31 +6,28 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
+
 import java.util.Calendar;
-import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity
@@ -56,20 +53,17 @@ public class MainActivity extends AppCompatActivity
             Log.w(TAG,"LAST ACTIVE TIME VALUE IS NULL!");
         final Switch radarSetupSwitch = findViewById(R.id.setupSwitch);
         statusCheck();
-        radarSetupSwitch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (radarSetupSwitch.isChecked())
-                    startService(new Intent(getBaseContext(), wifiRadarNnotifier.class));
+        radarSetupSwitch.setOnClickListener(v -> {
+            if (radarSetupSwitch.isChecked())
+                startService(new Intent(getBaseContext(), wifiRadarNnotifier.class));
 
-                else {
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putString(getString(R.string.saved_last_active_timeNdate), getTime());
-                        editor.apply();
-                    Toast.makeText(context, "Turn OFF location", Toast.LENGTH_LONG).show();
-                    startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    stopService(new Intent(getBaseContext(),wifiRadarNnotifier.class));
-                }
+            else {
+                SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString(getString(R.string.saved_last_active_timeNdate), getTime());
+                    editor.apply();
+                Toast.makeText(context, "Turn OFF location", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                stopService(new Intent(getBaseContext(),wifiRadarNnotifier.class));
             }
         });
 
@@ -157,16 +151,8 @@ public class MainActivity extends AppCompatActivity
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("This app requires Location to be turned ON, Do you want to enable it?")
                 .setCancelable(false)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        dialog.cancel();
-                    }
-                });
+                .setPositiveButton("Yes", (dialog, id) -> startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
+                .setNegativeButton("No", (dialog, id) -> dialog.cancel());
         final AlertDialog alert = builder.create();
         alert.show();
     }
@@ -182,7 +168,6 @@ public class MainActivity extends AppCompatActivity
 
     private void turnGPSOn(){
         String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-
         if(!provider.contains("gps")){ //if gps is disabled
             final Intent poke = new Intent();
             poke.setClassName("com.android.settings", "com.android.settings.widget.SettingsAppWidgetProvider");
