@@ -1,9 +1,11 @@
 package com.example.mohammedwajahat.lightketchupapp;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -35,6 +38,7 @@ public class MainActivity extends AppCompatActivity
 
     static String TAG = "LIGHT KETCHUP";
     SharedPreferences sharedPref;
+    private int REQUEST_CODE_ASK_PERMISSIONS = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,19 @@ public class MainActivity extends AppCompatActivity
             Log.w(TAG,"LAST ACTIVE TIME VALUE IS NULL!");
         final Switch radarSetupSwitch = findViewById(R.id.setupSwitch);
         statusCheck();
+        if (ActivityCompat.checkSelfPermission(context, Manifest.
+                permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context,
+                Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED ){
+
+            requestPermissions(new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_CODE_ASK_PERMISSIONS);
+            Log.i(TAG, "User location NOT ENABLED, waiting for permission");
+            Toast.makeText(this, "Permission Not Granted... " +
+                    "App functionality will be limited", Toast.LENGTH_LONG).show();
+        }else{
         radarSetupSwitch.setOnClickListener(v -> {
             if (radarSetupSwitch.isChecked())
                 startService(new Intent(getBaseContext(), wifiRadarNnotifier.class));
@@ -65,18 +82,32 @@ public class MainActivity extends AppCompatActivity
                 startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                 stopService(new Intent(getBaseContext(),wifiRadarNnotifier.class));
             }
-        });
-
-
+        });}
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CODE_ASK_PERMISSIONS) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.i(TAG,"FINE_LOCATION Permission Granted By User...");//do nothing
+            } else {
+                Log.i(TAG,"FINE_LOCATION Permission Not Granted By User...");
+                // Permission for location Denied
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     @Override
