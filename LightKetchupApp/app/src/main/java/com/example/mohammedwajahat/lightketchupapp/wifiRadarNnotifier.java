@@ -1,5 +1,8 @@
 package com.example.mohammedwajahat.lightketchupapp;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -18,18 +21,21 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 public class wifiRadarNnotifier extends Service {
 
+    private static final String CHANNEL_ID = "LightKecthupScanNotif";
     public WifiManager wifiManager;
     String TAG = MainActivity.TAG;
     boolean notifierStatus = false;
     Ringtone r;
     List<String> ssidList = new ArrayList<>();
-    int alarmUserSetVol = 0;
+    int alarmUserSetVol = 0, userNotifStatus = 0;
     AudioManager am;
     boolean SILENT_MODE=false;
     private boolean wifi_status = false;
+
 
     BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -38,7 +44,7 @@ public class wifiRadarNnotifier extends Service {
             Log.d(TAG, "********WIFI-SCAN RESULTS*********");
             Log.d(TAG, String.valueOf(results));
             Log.d(TAG, ">>>>>>>>>" + results.toString() + "<<<<<<<<<");
-            setNotifierStatus(results.toString().contains("Ghaznavi") || results.toString().contains("Wan"));
+            setNotifierStatus(results.toString().contains("Shahzaib zia") || results.toString().contains("Duha Khizar"));
         }
     };
 
@@ -50,6 +56,10 @@ public class wifiRadarNnotifier extends Service {
 
     @Override
     public void onCreate() {
+        NotificationManager mNotificationManager = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        userNotifStatus = mNotificationManager.getCurrentInterruptionFilter();
+        mNotificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
         wifiManager = (WifiManager)
                 this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         IntentFilter intentFilter = new IntentFilter();
@@ -78,6 +88,20 @@ public class wifiRadarNnotifier extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0, notificationIntent, 0);
+
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(getText(R.string.notification_title))
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentText(getText(R.string.notification_message))
+                .setContentIntent(pendingIntent)
+                .build();
+
+        startForeground(1, notification);
+
         assert wifiManager != null;
         wifi_status = wifiManager.isWifiEnabled();
         if (!wifi_status)
@@ -102,6 +126,9 @@ public class wifiRadarNnotifier extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG,"wifiRadar Service Ended");
+        NotificationManager mNotifMgr = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotifMgr.setInterruptionFilter(userNotifStatus);
         unregisterReceiver(receiver);
         if(r!=null)
         r.stop();

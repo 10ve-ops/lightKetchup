@@ -2,11 +2,16 @@ package com.example.mohammedwajahat.lightketchupapp;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.format.DateFormat;
@@ -28,18 +33,31 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
+import java.net.NoRouteToHostException;
 import java.util.Calendar;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+    private static final String CHANNEL_ID = "LightKetchupChannel";
     static String TAG = "LIGHT KETCHUP";
     SharedPreferences sharedPref;
     private final int REQUEST_CODE_ASK_PERMISSIONS = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        NotificationManager mNotificationManager = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        // Check if the notification policy access has been granted for the app.
+        if (!mNotificationManager.isNotificationPolicyAccessGranted()) {
+            Toast
+                    .makeText(this,getText(R.string.DND_perm_dialogue),Toast.LENGTH_LONG)
+                    .show();
+            Intent intent = new Intent
+                    (android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+            startActivity(intent);
+        }
+        createNotificationChannel();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -68,7 +86,7 @@ public class MainActivity extends AppCompatActivity
         }else{
             radarSetupSwitch.setOnClickListener(v -> {
                 if (radarSetupSwitch.isChecked())
-                    startService(new Intent(getBaseContext(), wifiRadarNnotifier.class));
+                    startForegroundService(new Intent(getBaseContext(), wifiRadarNnotifier.class));
 
                 else {
                     SharedPreferences.Editor editor = sharedPref.edit();
@@ -194,9 +212,20 @@ public class MainActivity extends AppCompatActivity
 
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessageNoGps();
-
         }
     }
+
+    private void createNotificationChannel() {
+        NotificationChannel serviceChannel = new NotificationChannel(
+                CHANNEL_ID,
+                "LightKetchup Service Channel",
+                NotificationManager.IMPORTANCE_DEFAULT
+        );
+
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        manager.createNotificationChannel(serviceChannel);
+    }
+
 /*
     private void turnGPSOn(){
         String provider = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);

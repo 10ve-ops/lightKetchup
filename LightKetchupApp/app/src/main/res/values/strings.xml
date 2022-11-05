@@ -9,4 +9,8 @@
     <string name="radarSwitchTxt">Radar</string>
     <string name="preference_file_key">lightKetchupPrefVals</string>
     <string name="saved_last_active_timeNdate">0</string>
+    <string name="notification_title">Light Ketchup App</string>
+    <string name="notification_message">Scanning...</string>
+    <string name="ticker_text">This is ticker text</string>
+    <string name="DND_perm_dialogue">\"LightKetchup needs access to \"Do Not Disturb Mode\" for proper functioning..\"</string>
 </resources>
